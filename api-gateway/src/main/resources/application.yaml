@@ -1,0 +1,58 @@
+server:
+  port: 8765
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          lower-case-service-id: true
+      routes:
+        # Rotas internas do telepizza - apenas Gateway pode chamar
+        - id: telepizza-auth-internal
+          uri: lb://telepizza
+          predicates:
+            - Path=/auth/validate, /auth/internal-register
+        
+        # Rota para cardápios - PÚBLICA (não requer autenticação)
+        - id: telepizza-cardapio
+          uri: lb://telepizza
+          predicates:
+            - Path=/cardapio/**
+        
+        # Rota para pedidos - requer autenticação (filtro valida JWT)
+        - id: telepizza-pedidos
+          uri: lb://telepizza
+          predicates:
+            - Path=/pedidos/**
+
+        # Rota para estoque - requer autenticação
+        - id: estoque-service
+          uri: lb://estoque-microservice
+          predicates:
+            - Path=/estoque/**
+          filters:
+            - RewritePath=/estoque(?<segment>/?.*), /api/estoque$\{segment}
+        
+        # Rota catch-all para telepizza
+        - id: telepizza
+          uri: lb://telepizza
+          predicates:
+            - Path=/telepizza/**
+          filters:
+            - RewritePath=/telepizza/(?<path>.*), /$\{path}
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://naming-server:8761/eureka
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true

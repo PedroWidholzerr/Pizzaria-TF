@@ -2,24 +2,24 @@ package com.pasfinal.Aplicacao;
 
 import org.springframework.stereotype.Component;
 
-import com.pasfinal.Dominio.Dados.PedidoRepository;
 import com.pasfinal.Dominio.Entidades.Pedido;
+import com.pasfinal.Dominio.Servicos.PedidoService;
 
 @Component
 public class AtualizarStatusPedidoUC {
-    private PedidoRepository pedidoRepository;
 
-    public AtualizarStatusPedidoUC(PedidoRepository pedidoRepository){
-        this.pedidoRepository = pedidoRepository;
+    private final PedidoService pedidoService;
+
+    public AtualizarStatusPedidoUC(PedidoService pedidoService) {
+        this.pedidoService = pedidoService;
     }
 
-    public boolean run(long idPedido, Pedido.Status novoStatus){
-        Pedido pedido = pedidoRepository.recuperaPorId(idPedido);
-        if(pedido == null) {
+    public boolean run(long idPedido, Pedido.Status novoStatus) {
+        try {
+            pedidoService.atualizarStatus(idPedido, novoStatus);
+            return true;
+        } catch (IllegalArgumentException e) {
             return false;
         }
-        pedido.setStatus(novoStatus);
-        pedidoRepository.salva(pedido);
-        return true;
     }
 }

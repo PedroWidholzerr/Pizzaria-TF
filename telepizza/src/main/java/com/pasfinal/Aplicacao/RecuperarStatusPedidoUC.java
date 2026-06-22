@@ -2,20 +2,21 @@ package com.pasfinal.Aplicacao;
 
 import org.springframework.stereotype.Component;
 
-import com.pasfinal.Dominio.Dados.PedidoRepository;
 import com.pasfinal.Dominio.Entidades.Pedido;
+import com.pasfinal.Dominio.Servicos.PedidoService;
 
 @Component
 public class RecuperarStatusPedidoUC {
-    private PedidoRepository pedidoRepository;
 
-    public RecuperarStatusPedidoUC(PedidoRepository pedidoRepository){
-        this.pedidoRepository = pedidoRepository;
+    private final PedidoService pedidoService;
+
+    public RecuperarStatusPedidoUC(PedidoService pedidoService) {
+        this.pedidoService = pedidoService;
     }
 
-    public Pedido.Status run(long idPedido){
-        Pedido pedido = pedidoRepository.recuperaPorId(idPedido);
-        if(pedido==null) return null;
+    public Pedido.Status run(long idPedido) {
+        Pedido pedido = pedidoService.consultarPedido(idPedido);
+        if (pedido == null) return null;
         return pedido.getStatus();
     }
 }
